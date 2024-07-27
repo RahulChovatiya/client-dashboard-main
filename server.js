@@ -2,8 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
-const Client = require('./src/models/dataSchema'); // Ensure this path is correct
-const SentEmail = require('./src/models/emailSchema'); // New schema for sent emails
+const Client = require('./src/models/dataSchema');
+const SentEmail = require('./src/models/emailSchema');
+const authRoutes = require('./src/models/authRoutes'); // Ensure this file is correctly implemented
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -11,19 +12,20 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect('mongodb://localhost:27017/client_add', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+const mongoURI = 'mongodb://127.0.0.1:27017/client_add';
+
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch(err => {
     console.error('MongoDB connection error:', err);
     process.exit(1);
   });
 
+app.use('/api/auth', authRoutes);
+
 app.post('/clients', async (req, res) => {
   try {
-    console.log('Request body:', req. body); // Log the request body to inspect it
+    console.log('Request body:', req.body);
     const newClient = new Client(req.body);
     const savedClient = await newClient.save();
     res.status(201).json(savedClient);
@@ -62,44 +64,39 @@ app.delete('/clients/:id', async (req, res) => {
 app.post('/send-email', async (req, res) => {
   const { clientIds, emailSubject, emailDescription, senderEmail } = req.body;
 
-  // Check for required fields
   if (!clientIds || !emailSubject || !emailDescription || !senderEmail) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
-    // Fetch clients
     const clients = await Client.find({ _id: { $in: clientIds } });
     if (clients.length === 0) {
       return res.status(404).json({ error: 'No clients found' });
     }
 
-    // Configure nodemailer transport with Mailtrap
     const transporter = nodemailer.createTransport({
       host: 'sandbox.smtp.mailtrap.io',
-      port: 2525,  // Mailtrap SMTP port
+      port: 2525,
       auth: {
-        user: 'db3987ce75a311', // Replace with your Mailtrap username
-        pass: '297cb7934a55d8'  // Replace with your Mailtrap password
+        user: '111658506cf4ff',
+        pass: 'f71d6bf3f66cac'
       }
     });
 
-    // Send emails from a fixed sender email address
     await Promise.all(clients.map(client => {
       return transporter.sendMail({
-        from: senderEmail, // Use the senderEmail from the request body
+        from: senderEmail,
         to: client.email,
         subject: emailSubject,
         text: emailDescription
       });
     }));
 
-    // Log email sending with sender email from the request body
     const emailLog = new SentEmail({
       emailSubject,
       emailDescription,
       clientEmails: clients.map(client => client.email),
-      senderEmail, // Include the senderEmail from the request body in the log
+      senderEmail,
     });
 
     await emailLog.save();
@@ -110,8 +107,6 @@ app.post('/send-email', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);

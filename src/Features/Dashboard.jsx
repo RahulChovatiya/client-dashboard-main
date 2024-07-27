@@ -86,7 +86,7 @@ function Dashboard() {
       <div>
         <div className='mb-6'>
           <div className='grid grid-cols-3 space-x-3'>
-            <div className='shadow-xl py-7 border-2 border-blue-400 rounded-lg'>
+            <div className='shadow-xl py-7 border-2 bg-white border-blue-400 rounded-lg'>
               <div className='flex flex-col justify-center items-center'>
                 <p className='text-xl font-semibold mb-2'>Completed</p>
                 <div>
@@ -94,13 +94,13 @@ function Dashboard() {
                 </div>
               </div>
             </div>
-            <div className='shadow-xl py-7 border-2 border-blue-400 rounded-lg'><div className='flex flex-col justify-center items-center'>
+            <div className='shadow-xl py-7 border-2 bg-white border-blue-400 rounded-lg'><div className='flex flex-col justify-center items-center'>
               <p className='text-xl font-semibold mb-2'>Pending</p>
               <div>
                 <p className='text-4xl font-semibold'>12</p>
               </div>
             </div></div>
-            <div className='shadow-xl py-7 border-2 border-blue-400 rounded-lg'><div className='flex flex-col justify-center items-center'>
+            <div className='shadow-xl py-7 border-2 bg-white border-blue-400 rounded-lg'><div className='flex flex-col justify-center items-center'>
               <p className='text-xl font-semibold mb-2'>Total Client</p>
               <div>
                 <p className='text-4xl font-semibold'>12</p>
@@ -160,7 +160,6 @@ function Dashboard() {
       setSelectedClients(selectedClients.filter(id => id !== clientId));
     }
 
-    // Hide email form if no clients are selected
     if (selectedClients.length === 1 && !e.target.checked) {
       setShowEmailForm(false);
     }
@@ -190,7 +189,7 @@ function Dashboard() {
           clientIds: selectedClients,
           emailSubject,
           emailDescription,
-          senderEmail: 'meetsathavara10@gmail.com',
+          senderEmail: 'rahulchovatiya05@gmail.com',
         }),
       });
 
